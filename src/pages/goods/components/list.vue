@@ -9,7 +9,7 @@
       :tree-props="{ children: 'children' }"
     >
       <el-table-column prop="id" label="商品编号" width="80"></el-table-column>
-      <el-table-column prop="goodsname" label="商品名称" width="100">
+      <el-table-column prop="goodsname" label="商品名称" width="120">
       </el-table-column>
       <el-table-column prop="price" label="商品价格"> </el-table-column>
       <el-table-column prop="market_price" label="市场价格"> </el-table-column>

@@ -6,19 +6,31 @@
     @opened="opened"
   >
     <el-form :model="Obj" label-width="100px">
-      {{Obj}}
+      {{ Obj }}
       <!-- 一级分类 -->
       <el-form-item label="一级分类">
         <el-select v-model="Obj.first_cateid" @change="changeFirst">
           <el-option label="--请选择--" value="" disabled></el-option>
-          <el-option v-for='item in cateList' :label="item.catename" :key="item.id" :value="item.id">{{item.catename}}</el-option>
+          <el-option
+            v-for="item in cateList"
+            :label="item.catename"
+            :key="item.id"
+            :value="item.id"
+            >{{ item.catename }}</el-option
+          >
         </el-select>
       </el-form-item>
       <!-- 二级分类 -->
       <el-form-item label="二级分类">
         <el-select v-model="Obj.second_cateid">
           <el-option label="--请选择--" value="" disabled></el-option>
-          <el-option v-for='item in secondList' :key="item.id" :label="item.catename" :value="item.id">{{item.catename}}</el-option>
+          <el-option
+            v-for="item in secondList"
+            :key="item.id"
+            :label="item.catename"
+            :value="item.id"
+            >{{ item.catename }}</el-option
+          >
         </el-select>
       </el-form-item>
       <!-- 商品名称 -->
@@ -47,10 +59,19 @@
       </el-form-item>
       <!-- 商品规格 -->
       <el-form-item label="商品规格">
-        <el-select v-model="Obj.specsid" placeholder="请选择" @change="cheangeSpecs">
+        <el-select
+          v-model="Obj.specsid"
+          placeholder="请选择"
+          @change="cheangeSpecs"
+        >
           <el-option label="--请选择--" value="" disabled></el-option>
-          <el-option v-for='item in specsList' :key="item.id" :label="item.specsname" :value="item.id">
-          {{item.specsname}}
+          <el-option
+            v-for="item in specsList"
+            :key="item.id"
+            :label="item.specsname"
+            :value="item.id"
+          >
+            {{ item.specsname }}
           </el-option>
         </el-select>
       </el-form-item>
@@ -59,7 +80,13 @@
         <!-- 多选 -->
         <el-select v-model="Obj.specsattr" multiple placeholder="请选择">
           <el-option label="--请选择--" value="" disabled></el-option>
-          <el-option v-for='item in specsAttr' :key="item" :label="item" :value="item">{{item}}</el-option>
+          <el-option
+            v-for="item in specsAttr"
+            :key="item"
+            :label="item"
+            :value="item"
+            >{{ item }}</el-option
+          >
         </el-select>
       </el-form-item>
       <!-- 是否新品 -->
@@ -97,7 +124,13 @@
 // 富文本编辑器
 import E from 'wangeditor'
 
-import { specsinfo,catelist,goodsadd, goodsedit, goodsinfo } from '../../../utils/http'
+import {
+  specsinfo,
+  catelist,
+  goodsadd,
+  goodsedit,
+  goodsinfo
+} from '../../../utils/http'
 import { success, err } from '../../../utils/alert'
 
 import { mapActions, mapGetters } from 'vuex'
@@ -107,11 +140,11 @@ export default {
   computed: {
     ...mapGetters({
       // 分类list
-      cateList:'cate/list',
+      cateList: 'cate/list',
       // 商品规格的list
-      specsList:'specs/list',
+      specsList: 'specs/list',
       // 商品列表数据
-      goodsList:'goods/list',
+      goodsList: 'goods/list',
       // 总数
       total: 'goods/total',
       // 一页的数量
@@ -137,19 +170,20 @@ export default {
       },
       urlImg: '',
       // 二级分类列表
-      secondList:[],
+      secondList: [],
       // 商品规格二级列表
-      specsAttr:[]
+      specsAttr: [],
+      editor: {}
     }
   },
   methods: {
     ...mapActions({
       // 分类列表获取
-      reqCateList:'cate/reqList',
+      reqCateList: 'cate/reqList',
       // 规格列表获取
       reqSpecsList: 'specs/reqList',
       // 商品列表
-      reqList:'goods/reqList',
+      reqList: 'goods/reqList',
       // 总数
       reqTotal: 'goods/reqTotal',
       changePage: 'goods/changePage'
@@ -169,32 +203,33 @@ export default {
     },
 
     // 修改了一级分类
-    changeFirst(){
+    changeFirst () {
       this.Obj.second_cateid = ''
       this.getSecondList()
     },
 
     // 根据一级分类计算出二级分类的List
-    getSecondList(){
-      catelist(this.Obj.first_cateid).then(res=>{
-        if (res.data.code==200) {
-          let a = res.data.list.find(item=>{
-            return item.id = this.Obj.first_cateid
-          })
-          this.secondList = a.children
+    getSecondList () {
+      catelist().then(res => {
+        console.log(this.Obj.first_cateid,'我是id号');
+        console.log(res.data.list);
+        if (res.data.code == 200) {
+          let a = res.data.list.find(item => {
+            return (item.id === this.Obj.first_cateid)
+          }).children
+          console.log(a);
+          this.secondList = a
         }
       })
     },
 
-
-
     //商品规格
-    cheangeSpecs(){
-      // this.Obj.specsattr = '[]'
+    cheangeSpecs () {
+      this.Obj.specsattr = []
       this.getSpecsList()
     },
-    getSpecsList(){
-      specsinfo(this.Obj.specsid).then(res=>{
+    getSpecsList () {
+      specsinfo(this.Obj.specsid).then(res => {
         this.specsAttr = JSON.parse(res.data.list[0].attrs)
       })
     },
@@ -230,7 +265,7 @@ export default {
     },
     // 清空
     emipty () {
-      this.Obj = {
+      ;(this.Obj = {
         first_cateid: '', //一级分类编号
         second_cateid: '', //二级分类编号
         goodsname: '', //商品名称
@@ -243,20 +278,22 @@ export default {
         isnew: 1, //是否新品     1-是 2-否
         ishot: 1, //是否热卖推荐 1-是 2-否
         status: 1 //状态
-      },
-      this.urlImg = ''
+      }),
+        (this.urlImg = '')
     },
     // 获取一条数据
     getOne (id) {
       goodsinfo(id).then(res => {
         res.data.list.id = id
         if (res.data.code === 200) {
-          
-          this.Obj = res.data.list
-          this.Obj.specsattr = this.Obj.specsattr.split(',')
-          this.urlImg = this.$imgUrl + res.data.list.img
-          this.editor.txt.html(this.Obj.description)
-          console.log(res.data.list,'需要编辑的数据');
+          setTimeout(() => {
+            this.Obj = res.data.list
+            this.Obj.specsattr = this.Obj.specsattr.split(',')
+            this.urlImg = this.$imgUrl + res.data.list.img
+            console.log(this.Obj.description)
+            this.editor.txt.html(this.Obj.description)
+          }, 500)
+          console.log(res.data.list, '需要编辑的数据')
         }
       })
     },
@@ -281,12 +318,12 @@ export default {
       })
     }
   },
-  mounted() {
+  mounted () {
     // 分类列表
     this.reqCateList()
     // 规格列表
     this.reqSpecsList(true)
-  },
+  }
 }
 </script>
 <style scoped>
