@@ -211,13 +211,10 @@ export default {
     // 根据一级分类计算出二级分类的List
     getSecondList () {
       catelist().then(res => {
-        console.log(this.Obj.first_cateid,'我是id号');
-        console.log(res.data.list);
         if (res.data.code == 200) {
           let a = res.data.list.find(item => {
-            return (item.id === this.Obj.first_cateid)
+            return item.id === this.Obj.first_cateid
           }).children
-          console.log(a);
           this.secondList = a
         }
       })
@@ -232,36 +229,6 @@ export default {
       specsinfo(this.Obj.specsid).then(res => {
         this.specsAttr = JSON.parse(res.data.list[0].attrs)
       })
-    },
-    // 添加
-    add () {
-      // 处理数据
-      this.Obj.description = this.editor.txt.html()
-      let data = {
-        ...this.Obj,
-        specsattr: JSON.stringify(this.Obj.specsattr)
-      }
-
-      goodsadd(this.Obj).then(res => {
-        console.log(this.Obj, '86打印')
-        if (res.data.code === 200) {
-          this.cancel()
-          this.emipty()
-          // 刷新页面
-          this.reqList()
-          this.reqTotal()
-          success(res.data.msg)
-        } else {
-          err(res.data.msg)
-        }
-      })
-    },
-    // 取消
-    cancel () {
-      if (!this.obj.isadd) {
-        this.emipty()
-      }
-      this.obj.isshow = false
     },
     // 清空
     emipty () {
@@ -281,6 +248,77 @@ export default {
       }),
         (this.urlImg = '')
     },
+    checkPromise () {
+      return new Promise(resolve => {
+        if (this.Obj.first_cateid === '') {
+          err('一级分类不能为空')
+          return
+        }
+        if (this.Obj.second_cateid === '') {
+          err('二级分类不能为空')
+          return
+        }
+
+        if (this.Obj.goodsname === '') {
+          err('商品名称不能为空')
+          return
+        }
+
+        if (this.Obj.price === '') {
+          err('商品价格不能为空')
+          return
+        }
+        if (this.Obj.market_price === '') {
+          err('市场价格不能为空')
+          return
+        }
+        if (this.Obj.img === '') {
+          err('图片不能为空')
+          return
+        }
+
+        if (this.Obj.specsid === '') {
+          err('商品属性不能为空')
+          return
+        }
+
+        if (this.Obj.specsattr == '[]') {
+          err('商品规格不能为空')
+          return
+        }
+        resolve()
+      })
+    },
+    // 添加
+    add () {
+      this.checkPromise().then(res => {
+        // 处理数据
+        this.Obj.description = this.editor.txt.html()
+        let data = {
+          ...this.Obj,
+          specsattr: JSON.stringify(this.Obj.specsattr)
+        }
+        goodsadd(this.Obj).then(res => {
+          if (res.data.code === 200) {
+            this.cancel()
+            this.emipty()
+            // 刷新页面
+            this.reqList()
+            this.reqTotal()
+            success(res.data.msg)
+          } else {
+            err(res.data.msg)
+          }
+        })
+      })
+    },
+    // 取消
+    cancel () {
+      if (!this.obj.isadd) {
+        this.emipty()
+      }
+      this.obj.isshow = false
+    },
     // 获取一条数据
     getOne (id) {
       goodsinfo(id).then(res => {
@@ -299,22 +337,24 @@ export default {
     },
     // 修改
     modify () {
-      this.obj.isshow = false
-      // 处理字符串
-      this.Obj.description = this.editor.txt.html()
-      let data = {
-        ...this.Obj,
-        specsattr: JSON.stringify(this.Obj.specsattr)
-      }
-      goodsedit(this.Obj).then(res => {
-        if (res.data.code === 200) {
-          success(res.data.msg)
-          // 刷新页面
-          this.reqList()
-          this.reqTotal()
-          // 清空
-          this.emipty()
+      this.checkPromise().then(res => {
+        this.obj.isshow = false
+        // 处理字符串
+        this.Obj.description = this.editor.txt.html()
+        let data = {
+          ...this.Obj,
+          specsattr: JSON.stringify(this.Obj.specsattr)
         }
+        goodsedit(this.Obj).then(res => {
+          if (res.data.code === 200) {
+            success(res.data.msg)
+            // 刷新页面
+            this.reqList()
+            this.reqTotal()
+            // 清空
+            this.emipty()
+          }
+        })
       })
     }
   },

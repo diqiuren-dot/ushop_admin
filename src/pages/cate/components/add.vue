@@ -6,11 +6,7 @@
   >
     <el-form :model="cateObj" label-width="100px">
       <el-form-item label="上级分类">
-        <el-select
-          v-model="cateObj.pid"
-          placeholder="请选择分类"
-         
-        >
+        <el-select v-model="cateObj.pid" placeholder="请选择分类">
           <el-option label="--请选择--" value="shanghai" disabled></el-option>
           <el-option label="顶级分类" :value="0">顶级分类</el-option>
           <el-option
@@ -26,17 +22,16 @@
 
       <el-form-item label="分类名称" prop="catename">
         <el-input v-model="cateObj.catename"></el-input>
-
       </el-form-item>
 
-      <el-form-item label="图片" prop="catename" v-if='cateObj.pid !== 0'>
+      <el-form-item label="图片" prop="catename" v-if="cateObj.pid !== 0">
         <el-upload
           class="avatar-uploader"
           action="#"
           :show-file-list="false"
           :on-change="changeImg"
         >
-          <img v-if="urlImg !== ''"  :src="urlImg" class="avatar"  />
+          <img v-if="urlImg !== ''" :src="urlImg" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
@@ -60,15 +55,15 @@
 </template>
 <script>
 import { cateadd, cateedit, cateinfo } from '../../../utils/http'
-import {success,err} from '../../../utils/alert';
+import { success, err } from '../../../utils/alert'
 
-import {mapActions,mapGetters} from 'vuex';
+import { mapActions, mapGetters } from 'vuex'
 export default {
   // obj 控制消失出现的 变量 是个对象
   props: ['obj'],
-  computed:{
+  computed: {
     ...mapGetters({
-      list:'cate/list'
+      list: 'cate/list'
     })
   },
   data () {
@@ -85,28 +80,37 @@ export default {
   },
   methods: {
     ...mapActions({
-      'reqList':'cate/reqList'
+      reqList: 'cate/reqList'
     }),
     // 上传图片
     changeImg (e) {
       let file = e.raw
       // 展示页面 不传递后台
-      console.log(file);
+      console.log(file)
       this.urlImg = URL.createObjectURL(file)
       this.cateObj.img = file
     },
-    add () {
-      console.log(this.cateObj,4894984984);
-      cateadd(this.cateObj).then(res => {
-        if (res.data.code === 200) {
-          this.cancel()
-          this.emipty()
-          // 刷新页面
-          this.reqList()
-          success(res.data.msg)
-        }else{
-          err(res.data.msg)
+    checkPromise () {
+      return new Promise(reslove => {
+        if (this.cateObj.catename == '') {
+          err('分类名称不能为空')
         }
+        reslove()
+      })
+    },
+    add () {
+      this.checkPromise().then(res => {
+        cateadd(this.cateObj).then(res => {
+          if (res.data.code === 200) {
+            this.cancel()
+            this.emipty()
+            // 刷新页面
+            this.reqList()
+            success(res.data.msg)
+          } else {
+            err(res.data.msg)
+          }
+        })
       })
     },
     // 取消
@@ -138,14 +142,16 @@ export default {
     },
     // 修改
     modify () {
-      this.obj.isshow = false
-      cateedit(this.cateObj).then(res => {
-        if (res.data.code === 200) {
-          success(res.data.msg)
-          // 刷新页面
-          this.reqList()
-          this.emipty()
-        }
+      this.checkPromise().then(res => {
+        this.obj.isshow = false
+        cateedit(this.cateObj).then(res => {
+          if (res.data.code === 200) {
+            success(res.data.msg)
+            // 刷新页面
+            this.reqList()
+            this.emipty()
+          }
+        })
       })
     }
   }
