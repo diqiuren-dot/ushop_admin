@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import axios from 'axios'
 import qs from 'qs'
+import store from '../store';
+
+import router from '../router';
 // 开发环境
 let kurl = '/api'
 Vue.prototype.$imgUrl = 'http://localhost:3000'
@@ -11,24 +14,31 @@ Vue.prototype.$imgUrl = 'http://localhost:3000'
 
 // 响应拦截
 axios.interceptors.response.use(res => {
+  
   console.group('本次请求地址是：' + res.config.url)
   console.log(res)
   console.groupEnd()
-  if (res.data.list === null) {
-    res.data.list === []
+
+  // 统一掉线处理
+  if (res.data.msg === '登录已过期或访问权限受限') {
+    
+    store.dispatch('changeUser', {})
+    router.push('/login')
   }
   return res
 })
 
-//请求拦截
-// axios.interceptors.request.use(req=>{
-//   console.log(req);
-//   return req
-// })
+// 请求拦截  设置请求头
+axios.interceptors.request.use(req=>{
+  if (req.url!== kurl + '/api/userlogin' ) {
+    req.headers.authorization = store.state.user.token
+  }
+  return req
+})
 // 登陆 /api/login
 export let login = user => {
   return axios({
-    url: kurl + '/api/login',
+    url: kurl + '/api/userlogin',
     method: 'post',
     data: qs.stringify(user)
   })
@@ -515,6 +525,63 @@ export let goodsedit = (obj)=>{
 export let goodsdelete = (id)=>{
   return axios({
     url: kurl + '/api/goodsdelete',
+    method:"post",
+    data: qs.stringify({
+      id:id
+    })
+  })
+}
+
+// ***************************限时秒杀管理****************************
+
+// 1.限时秒杀添加 /api/seckadd
+
+export let seckadd = (obj)=>{
+  return axios({
+    url: kurl + '/api/seckadd',
+    method:"post",
+    data: qs.stringify(obj)
+  })
+}
+
+// 2.限时秒杀列表 /api/secklist
+
+export let secklist = ()=>{
+  return axios({
+    url: kurl + '/api/secklist',
+    method:"get"
+  })
+}
+
+
+// 3.限时秒杀获取（一条）/api/seckinfo
+
+export let seckinfo = (id)=>{
+  return axios({
+    url: kurl + '/api/seckinfo',
+    method:"get",
+    params:{
+      id:id
+    }
+  })
+}
+
+
+// 4.限时秒杀修改 /api/seckedit
+
+export let seckedit = (obj)=>{
+  return axios({
+    url: kurl + '/api/seckedit',
+    method:"post",
+    data: qs.stringify(obj)
+  })
+}
+
+// 5.限时秒杀删除 /api/seckdelete
+
+export let seckdelete = (id)=>{
+  return axios({
+    url: kurl + '/api/seckdelete',
     method:"post",
     data: qs.stringify({
       id:id

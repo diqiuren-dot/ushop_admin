@@ -15,43 +15,44 @@
             <i class="el-icon-menu"></i>
             <span slot="title">首页</span>
           </el-menu-item>
-          <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>系统设置</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="/index/menu">菜单管理</el-menu-item>
-              <el-menu-item index="/index/role">角色管理</el-menu-item>
-              <el-menu-item index="/index/manage">管理员管理</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
 
-          <el-submenu index="2">
-            <template slot="title">
-              <p>
-                <i class="el-icon-location"></i>
-                <span>商城管理</span>
-              </p>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="/index/cate">商品分类</el-menu-item>
-              <el-menu-item index="/index/specs">商品规格</el-menu-item>
-              <el-menu-item index="/index/goods">商品管理</el-menu-item>
-              <el-menu-item index="/index/member">会员管理</el-menu-item>
-              <el-menu-item index="/index/banner">轮播图管理</el-menu-item>
-              <el-menu-item index="/index/seckill">秒杀活动</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
+          <div v-for="item in user.menus" :key="item.id">
+            <el-menu-item v-if="!item.children" :index="item.url">
+              <i :class="item.icon"></i>
+              <span>{{ item.title }}</span>
+            </el-menu-item>
+
+            <el-submenu :index="item.id + ''" v-if="item.children">
+              <template slot="title">
+                <i :class="item.icon"></i>
+                <span>{{ item.title }}</span>
+              </template>
+              <el-menu-item-group>
+                <el-menu-item
+                  v-for="i in item.children"
+                  :key="i.id"
+                  :index="'/index' + i.url"
+                >
+                  {{ i.title }}
+                </el-menu-item>
+              </el-menu-item-group>
+            </el-submenu>
+          </div>
         </el-menu>
       </el-aside>
 
       <!-- 主体内容 -->
       <el-container>
-        <el-header> </el-header>
+        <el-header>
+          <span>{{ user.username }}</span>
+          <el-button type="danger" @click="cal">退出</el-button>
+        </el-header>
+
         <el-breadcrumb separator-class="el-icon-arrow-right" class="mbx">
-          <el-breadcrumb-item :to="{ path: '/' }" v-if="$route.name">首页</el-breadcrumb-item>
-          <el-breadcrumb-item>{{$route.name}}</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/' }" v-if="$route.name"
+            >首页</el-breadcrumb-item
+          >
+          <el-breadcrumb-item>{{ $route.name }}</el-breadcrumb-item>
         </el-breadcrumb>
         <!-- 二级路由出口 -->
         <router-view></router-view>
@@ -61,21 +62,48 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+import router from '../../router'
 export default {
   data () {
     return {}
+  },
+  computed: {
+    ...mapGetters({
+      user: 'user'
+    })
+  },
+  methods: {
+    ...mapActions({
+      changeUser: 'changeUser'
+    }),
+    cal () {
+      this.$confirm('你确定要退出吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          //点了删除按钮
+          this.changeUser({})
+          router.push('/login')
+        })
+        .catch(() => {})
+    }
+  },
+  mounted () {
+    console.log(this.user.menus, '用户数据')
   }
 }
 </script>
 <style scoped>
-.mbx{
+.mbx {
   margin: 10px;
 }
-.el-header,
-.el-footer {
+.el-header {
   background-color: #b3c0d1;
   color: #333;
-  text-align: center;
+  text-align: right;
 }
 
 .el-aside {

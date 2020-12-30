@@ -11,7 +11,7 @@
           class="demo-ruleForm"
         >
           <el-form-item label="账号" prop="age">
-            <el-input v-model.number="user.phone"></el-input>
+            <el-input v-model.number="user.username"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="pass">
             <el-input
@@ -33,6 +33,8 @@
 </template>
 <script>
 import { login } from '../../utils/http';
+import { success,err } from '../../utils/alert';
+import {mapGetters,mapActions} from 'vuex';
 export default {
   data () {
     var checkAge = (rule, value, callback) => {
@@ -58,16 +60,24 @@ export default {
     return {
       user: {
         password: '',
-        phone: ''
+        username: ''
       }
       
     }
   },
   methods: {
+    ...mapActions({
+      changeUser:'changeUser'
+    }),
     lo(){
-      login().then(res=>{
-        console.log(this.user);
-        this.$router.push('/index')
+      login(this.user).then(res=>{
+        if (res.data.code == 200) {
+          success(res.data.msg)
+          this.changeUser(res.data.list)
+          this.$router.push('index')
+        }else{
+          err(res.data.msg)
+        }
       }) 
     }
   }
