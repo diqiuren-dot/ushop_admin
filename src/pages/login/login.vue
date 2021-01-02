@@ -101,7 +101,9 @@ export default {
   border-radius: 10px;
 
 }
-
+.el-form{
+  width: 100%;
+}
 .con h1 {
   text-align: center;
   padding: 20px 0;
